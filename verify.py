@@ -99,10 +99,11 @@ def run(pth_path):
     offset = 0
     for images, labels in tqdm(data_loader):
         bz = len(labels)
-        _, pred = model(images.to(device)).topk(1, dim=1)
+        res = model(images.to(device))
+        _, pred = res.topk(1, dim=1)
         preds.append(pred.squeeze(1).cpu())
         target.append(labels)
-        _, top10 = torch.topk(pred, 10)
+        _, top10 = res.topk(10, dim=1)
         top_10_preds[offset:offset + bz, :] = top10.detach().cpu().numpy()
         offset += bz
 
