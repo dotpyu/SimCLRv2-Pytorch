@@ -61,7 +61,7 @@ def construct_val(ilsvrc_path):
 
     val_loader = torch.utils.data.DataLoader(
         unnoamlized_data,
-        batch_size=4, shuffle=False, pin_memory=True)
+        batch_size=4, shuffle=False, pin_memory=True, drop_last=False)
 
     return val_loader
 
@@ -101,7 +101,7 @@ def run(pth_path, ig=True):
 
     top_10_preds = np.zeros((data_sz, 10))
     if ig:
-        ig_save = np.zeros((data_sz, 3, 224, 224))
+        ig_save = np.zeros((data_sz+2, 3, 224, 224))
     offset = 0
     for images, labels in tqdm(data_loader):
         bz = len(labels)
