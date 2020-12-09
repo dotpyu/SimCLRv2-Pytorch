@@ -34,8 +34,8 @@ def construct_val(ilsvrc_path):
     val_dataset = datasets.ImageFolder(valdir, transforms.Compose([
         transforms.Resize(256),
         transforms.CenterCrop(224),
-        transforms.ToTensor(),
-        normalize,
+        transforms.ToTensor()
+        #normalize,
     ]))
 
     val_loader = torch.utils.data.DataLoader(
