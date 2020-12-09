@@ -8,7 +8,7 @@ from tqdm import tqdm
 import torchvision.transforms as transforms
 from torch.utils.data import Dataset, DataLoader
 import torchvision.datasets as datasets
-from resnet import get_resnet, name_to_params
+from simclr_resnet import get_sresnet, name_to_params
 import numpy as np
 from sklearn.metrics import accuracy_score
 # class ImagenetValidationDataset(Dataset):
@@ -79,7 +79,7 @@ def accuracy(output, target, topk=(1,)):
 
 ccv_simclr_path = '/users/pyu12/scratch/ilsvrc_small_val/adjusted_simclr_r50.pth'
 def construct_simclr(pth_path=ccv_simclr_path):
-    model, _ = get_resnet(50, 1, 0)
+    model, _ = get_sresnet(50, 1, 0)
     model.load_state_dict(torch.load(pth_path))
     return model
 
