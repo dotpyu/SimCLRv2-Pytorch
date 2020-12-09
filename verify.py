@@ -90,7 +90,7 @@ def run(pth_path, ig=True):
     # model, _ = get_resnet(*name_to_params(pth_path))
     # model.load_state_dict(torch.load(pth_path)['resnet'])
     model = construct_simclr()
-    model = model.to(device).train()
+    model = model.to(device).eval()
     preds = []
     target = []
     data_sz = 10000
@@ -155,4 +155,5 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='SimCLR verifier')
     parser.add_argument('pth_path', type=str, help='path of the input checkpoint file')
     args = parser.parse_args()
+    run(args.pth_path, ig=False)
     run(args.pth_path)
