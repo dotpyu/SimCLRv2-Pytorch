@@ -27,19 +27,40 @@ from resnet import get_resnet, name_to_params
 #         return self.transform(img), self.labels[item]
 
 def construct_val(ilsvrc_path):
-    valdir = os.path.join(ilsvrc_path, 'val')
-    normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                                     std=[0.229, 0.224, 0.225])
+    # valdir = os.path.join(ilsvrc_path, 'val')
+    # normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
+    #                                  std=[0.229, 0.224, 0.225])
+    #
+    # val_dataset = datasets.ImageFolder(valdir, transforms.Compose([
+    #     transforms.Resize(256),
+    #     transforms.CenterCrop(224),
+    #     transforms.ToTensor()
+    #     #normalize,
+    # ]))
+    #
+    # val_loader = torch.utils.data.DataLoader(
+    #     val_dataset,
+    #     batch_size=256, shuffle=False,
+    #     num_workers=4, pin_memory=True)
 
-    val_dataset = datasets.ImageFolder(valdir, transforms.Compose([
-        transforms.Resize(256),
-        transforms.CenterCrop(224),
-        transforms.ToTensor()
-        #normalize,
-    ]))
+    def inverse_normalize(tensor, mean, std):
+        for t, m, s in zip(tensor, mean, std):
+            t.mul_(s).add_(m)
+        return tensor
+    import joblib
+
+    small_val = '/users/pyu12/scratch/ilsvrc_small_val/10k.jbl'
+
+    data = joblib.load(small_val)
+
+    unnoamlized_data = []
+    for tup in data:
+        unnoamlized_data.append(
+            (inverse_normalize(tensor=torch.FloatTensor(tup[0]), mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
+             tup[1]))
 
     val_loader = torch.utils.data.DataLoader(
-        val_dataset,
+        unnoamlized_data,
         batch_size=256, shuffle=False,
         num_workers=4, pin_memory=True)
 
