@@ -83,29 +83,39 @@ def construct_simclr(pth_path=ccv_simclr_path):
     model.load_state_dict(torch.load(pth_path))
     return model
 
+def run(pth_path, ig=True):
 
-@torch.no_grad()
-def run(pth_path):
     device = 'cuda'
     data_loader = construct_val('/users/pyu12/data/pyu12/datasets/ILSVRC')
     # model, _ = get_resnet(*name_to_params(pth_path))
     # model.load_state_dict(torch.load(pth_path)['resnet'])
     model = construct_simclr()
-    model = model.to(device).eval()
+    model = model.to(device).train()
     preds = []
     target = []
     data_sz = 10000
+
+    if ig:
+        from captum.attr import IntegratedGradients, NoiseTunnel
+        IG = IntegratedGradients(model)
+
     top_10_preds = np.zeros((data_sz, 10))
+    if ig:
+        ig_save = np.zeros((data_sz, 3, 224, 224))
     offset = 0
     for images, labels in tqdm(data_loader):
         bz = len(labels)
-        res = model(images.to(device))
+        imgs = images.to(device)
+        res = model(imgs)
         _, pred = res.topk(1, dim=1)
         preds.append(pred.squeeze(1).cpu())
         target.append(labels)
         _, top10 = res.topk(10, dim=1)
         top_10_preds[offset:offset + bz, :] = top10.detach().cpu().numpy()
         offset += bz
+        if ig:
+            ig_attributions = IG.attribute(imgs, target=pred, n_steps=100)
+            ig_save[offset:offset + bz, :, :, :] = ig_attributions.detach().cpu().numpy()
 
     p = torch.cat(preds).numpy()
     t = torch.cat(target).numpy()
@@ -128,11 +138,12 @@ def run(pth_path):
     print(acc)
     save_loc = '/users/pyu12/scratch/ssl_exp/'
     name = 'simclr'
-    np.save(save_loc + name + '_stats_10k', [acc, acc, acc, acc])
-    np.save(save_loc + name + '_ground_truth_10k', ground_truth)
-    np.save(save_loc + name + '_prediceted_10k', predicted)
-    np.save(save_loc + name + '_top10pred_10k', top_10_preds)
-
+    # np.save(save_loc + name + '_stats_10k', [acc, acc, acc, acc])
+    # np.save(save_loc + name + '_ground_truth_10k', ground_truth)
+    # np.save(save_loc + name + '_prediceted_10k', predicted)
+    # np.save(save_loc + name + '_top10pred_10k', top_10_preds)
+    if ig:
+        np.save(save_loc+name+'_integrated_gradients_10k', ig_save)
 
 
     total_correct = np.mean(p==t)
