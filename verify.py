@@ -114,7 +114,7 @@ def run(pth_path, ig=True):
         top_10_preds[offset:offset + bz, :] = top10.detach().cpu().numpy()
         offset += bz
         if ig:
-            ig_attributions = IG.attribute(imgs, target=pred, n_steps=100)
+            ig_attributions = IG.attribute(imgs, target=pred.squeeze(1), n_steps=100)
             ig_save[offset:offset + bz, :, :, :] = ig_attributions.detach().cpu().numpy()
 
     p = torch.cat(preds).numpy()
