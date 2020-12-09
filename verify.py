@@ -95,7 +95,7 @@ def run(pth_path):
     preds = []
     target = []
     for images, labels in tqdm(data_loader):
-        _, pred = model(images.to(device), apply_fc=True).topk(1, dim=1)
+        _, pred = model(images.to(device)).topk(1, dim=1)
         preds.append(pred.squeeze(1).cpu())
         target.append(labels)
     p = torch.cat(preds).numpy()
