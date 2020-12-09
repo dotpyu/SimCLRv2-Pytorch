@@ -93,13 +93,14 @@ def run(pth_path):
         target.append(labels)
     p = torch.cat(preds).numpy()
     t = torch.cat(target).numpy()
-    all_counters = [Counter() for i in range(1000)]
-    for i in range(50000):
-        all_counters[t[i]][p[i]] += 1
-    total_correct = 0
-    for i in range(1000):
-        total_correct += all_counters[i].most_common(1)[0][1]
-    print(f'ACC: {total_correct / 50000 * 100}')
+    # all_counters = [Counter() for i in range(1000)]
+    # for i in range(50000):
+    #     all_counters[t[i]][p[i]] += 1
+    # total_correct = 0
+    # for i in range(1000):
+    #     total_correct += all_counters[i].most_common(1)[0][1]
+    total_correct = torch.mean(torch.LongTensor(p==t))
+    print('ACC: {:.4f}'.format(total_correct))
 
 
 if __name__ == '__main__':
