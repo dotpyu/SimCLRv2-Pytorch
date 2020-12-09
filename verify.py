@@ -77,13 +77,20 @@ def accuracy(output, target, topk=(1,)):
         res.append(correct_k)
     return res
 
+ccv_simclr_path = '/users/pyu12/scratch/ilsvrc_small_val/adjusted_simclr_r50.pth'
+def construct_simclr(pth_path=ccv_simclr_path):
+    model, _ = get_resnet(50, 1, 0)
+    model.load_state_dict(torch.load(pth_path))
+    return model
+
 
 @torch.no_grad()
 def run(pth_path):
     device = 'cuda'
     data_loader = construct_val('/users/pyu12/data/pyu12/datasets/ILSVRC')
-    model, _ = get_resnet(*name_to_params(pth_path))
-    model.load_state_dict(torch.load(pth_path)['resnet'])
+    # model, _ = get_resnet(*name_to_params(pth_path))
+    # model.load_state_dict(torch.load(pth_path)['resnet'])
+    model = construct_simclr()
     model = model.to(device).eval()
     preds = []
     target = []
