@@ -9,8 +9,8 @@ import torchvision.transforms as transforms
 from torch.utils.data import Dataset, DataLoader
 import torchvision.datasets as datasets
 from resnet import get_resnet, name_to_params
-
-
+import numpy as np
+from sklearn.metrics import accuracy_score
 # class ImagenetValidationDataset(Dataset):
 #     def __init__(self, val_path):
 #         super().__init__()
@@ -99,8 +99,10 @@ def run(pth_path):
     # total_correct = 0
     # for i in range(1000):
     #     total_correct += all_counters[i].most_common(1)[0][1]
-    total_correct = torch.mean(torch.LongTensor(p==t))
+
+    total_correct = np.mean(p==t)
     print('ACC: {:.4f}'.format(total_correct))
+    print(accuracy_score(p, t))
 
 
 if __name__ == '__main__':
