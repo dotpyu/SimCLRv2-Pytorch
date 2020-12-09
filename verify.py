@@ -7,24 +7,43 @@ from PIL import Image
 from tqdm import tqdm
 import torchvision.transforms as transforms
 from torch.utils.data import Dataset, DataLoader
-
+import torchvision.datasets as datasets
 from resnet import get_resnet, name_to_params
 
 
-class ImagenetValidationDataset(Dataset):
-    def __init__(self, val_path):
-        super().__init__()
-        self.val_path = val_path
-        self.transform = transforms.Compose([transforms.Resize(256), transforms.CenterCrop(224), transforms.ToTensor()])
-        with open(os.path.join(val_path, 'ILSVRC2012_validation_ground_truth.txt')) as f:
-            self.labels = [int(l) - 1 for l in f.readlines()]
+# class ImagenetValidationDataset(Dataset):
+#     def __init__(self, val_path):
+#         super().__init__()
+#         self.val_path = val_path
+#         self.transform = transforms.Compose([transforms.Resize(256), transforms.CenterCrop(224), transforms.ToTensor()])
+#         with open(os.path.join(val_path, 'ILSVRC2012_validation_ground_truth.txt')) as f:
+#             self.labels = [int(l) - 1 for l in f.readlines()]
+#
+#     def __len__(self):
+#         return len(self.labels)
+#
+#     def __getitem__(self, item):
+#         img = Image.open(os.path.join(self.val_path, f'ILSVRC2012_val_{item + 1:08d}.JPEG')).convert('RGB')
+#         return self.transform(img), self.labels[item]
 
-    def __len__(self):
-        return len(self.labels)
+def construct_val(ilsvrc_path):
+    valdir = os.path.join(ilsvrc_path, 'val')
+    normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                     std=[0.229, 0.224, 0.225])
 
-    def __getitem__(self, item):
-        img = Image.open(os.path.join(self.val_path, f'ILSVRC2012_val_{item + 1:08d}.JPEG')).convert('RGB')
-        return self.transform(img), self.labels[item]
+    val_dataset = datasets.ImageFolder(valdir, transforms.Compose([
+        transforms.Resize(256),
+        transforms.CenterCrop(224),
+        transforms.ToTensor(),
+        normalize,
+    ]))
+
+    val_loader = torch.utils.data.DataLoader(
+        val_dataset,
+        batch_size=256, shuffle=False,
+        num_workers=4, pin_memory=True)
+
+    return val_loader
 
 
 def accuracy(output, target, topk=(1,)):
@@ -42,8 +61,7 @@ def accuracy(output, target, topk=(1,)):
 @torch.no_grad()
 def run(pth_path):
     device = 'cuda'
-    dataset = ImagenetValidationDataset('./val/')
-    data_loader = DataLoader(dataset, batch_size=64, shuffle=False, pin_memory=True, num_workers=8)
+    data_loader = construct_val('/users/pyu12/data/pyu12/datasets/ILSVRC')
     model, _ = get_resnet(*name_to_params(pth_path))
     model.load_state_dict(torch.load(pth_path)['resnet'])
     model = model.to(device).eval()
