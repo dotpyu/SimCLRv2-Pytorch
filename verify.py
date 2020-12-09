@@ -61,7 +61,7 @@ def construct_val(ilsvrc_path):
 
     val_loader = torch.utils.data.DataLoader(
         unnoamlized_data,
-        batch_size=4, shuffle=False, pin_memory=True, drop_last=False)
+        batch_size=2, shuffle=False, pin_memory=True, drop_last=False)
 
     return val_loader
 
