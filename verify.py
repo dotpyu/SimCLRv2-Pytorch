@@ -94,10 +94,18 @@ def run(pth_path):
     model = model.to(device).eval()
     preds = []
     target = []
+    data_sz = 10000
+    top_10_preds = np.zeros((data_sz, 10))
+    offset = 0
     for images, labels in tqdm(data_loader):
+        bz = len(labels)
         _, pred = model(images.to(device)).topk(1, dim=1)
         preds.append(pred.squeeze(1).cpu())
         target.append(labels)
+        _, top10 = torch.topk(pred, 10)
+        top_10_preds[offset:offset + bz, :] = top10.detach().cpu().numpy()
+        offset += bz
+
     p = torch.cat(preds).numpy()
     t = torch.cat(target).numpy()
     # all_counters = [Counter() for i in range(1000)]
@@ -106,6 +114,25 @@ def run(pth_path):
     # total_correct = 0
     # for i in range(1000):
     #     total_correct += all_counters[i].most_common(1)[0][1]
+
+    ground_truth = t
+    predicted = p
+    test_true_labels = np.array(ground_truth)
+    test_results = np.array(predicted)
+
+    eval_mode = 'micro'
+
+    acc = accuracy_score(test_true_labels, test_results)
+
+    print(acc)
+    save_loc = '/users/pyu12/scratch/ssl_exp/'
+    name = 'simclr'
+    np.save(save_loc + name + '_stats_10k', [acc, acc, acc, acc])
+    np.save(save_loc + name + '_ground_truth_10k', ground_truth)
+    np.save(save_loc + name + '_prediceted_10k', predicted)
+    np.save(save_loc + name + '_top10pred_10k', top_10_preds)
+
+
 
     total_correct = np.mean(p==t)
     print('ACC: {:.4f}'.format(total_correct))
