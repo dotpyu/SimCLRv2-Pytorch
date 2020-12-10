@@ -145,7 +145,7 @@ class ResNet(nn.Module):
             layer2 = layer2.flatten(start_dim=1, end_dim=-1)
             layer3 = layer3.flatten(start_dim=1, end_dim=-1)
             layer4 = layer4.flatten(start_dim=1, end_dim=-1)
-            layers = [layer1, layer2, layer3, layer4, h]
+            layers = [layer1, layer2, layer3, layer4, h.flatten(start_dim=1, end_dim=-1)]
             return layers
 
         target_out = self.fc(h)
