@@ -80,7 +80,7 @@ def construct_val(ilsvrc_path, return_sz=False):
 
     val_loader = torch.utils.data.DataLoader(
         unnoamlized_data,
-        batch_size=2, shuffle=False, pin_memory=True, drop_last=False)
+        batch_size=64, shuffle=False, pin_memory=True, drop_last=False)
 
     if return_sz:
         return val_loader, len(unnoamlized_data)
@@ -150,15 +150,15 @@ def extract_latent():
     # model.load_state_dict(torch.load(pth_path)['resnet'])
     model = construct_simclr()
     model = model.to(device).eval()
-    latent_exp = np.zeros([data_sz, 2048])
+    latent_exp = np.zeros([data_sz, 100352])
     offset = 0
     for ndarray, label in data_loader:
         bz = len(label)
         imgs = torch.FloatTensor(ndarray).to(device)
         layers = model(imgs, output_layer=True)
-        latent_exp[offset:offset+bz,:] = layers[4].detach().cpu().numpy()
+        latent_exp[offset:offset+bz,:] = layers[3].detach().cpu().numpy()
 
-    np.save(save_loc+name+'_final_latent_rep_2048', latent_exp)
+    np.save(save_loc+name+'_final_latent_rep_100352', latent_exp)
     print('Completed')
 
 
