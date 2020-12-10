@@ -120,7 +120,7 @@ def awa_pipeline():
 
     train_split = int(0.8 * len(seen_label))
     val_split = int(0.9 * len(seen_label))
-    zipped = list(zip(inverse_normalize, seen_label))
+    zipped = list(zip(unnoamlized_inst, seen_label))
     shuffle(zipped)
     train_tuples = zipped[:train_split]
     val_tuples = zipped[train_split:val_split]
