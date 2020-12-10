@@ -106,7 +106,7 @@ def construct_simclr(pth_path=ccv_simclr_path):
 
 def awa_pipeline():
     import joblib
-    seen_tuples = joblib.load('/users/pyu12/data/pyu12/datasets/awa_bin/unseen_np.jkl')
+    seen_tuples = joblib.load('/users/pyu12/data/pyu12/datasets/awa_bin/seen_np.jkl')
 
     # Join Data and Select 0.8 for train, 0.1 for test, val
     seen_inst = seen_tuples[0]
@@ -152,11 +152,11 @@ def awa_eval(name, model, train, val, test, device='cuda:0'):
     l4_dim = 100352
     l5_dim = 2048
 
-    layer1_model = LC(l1_dim, target_dim=10).to(device)
-    layer2_model = LC(l2_dim, target_dim=10).to(device)
-    layer3_model = LC(l3_dim, target_dim=10).to(device)
-    layer4_model = LC(l4_dim, target_dim=10).to(device)
-    layer5_model = LC(l5_dim, target_dim=10).to(device)
+    layer1_model = LC(l1_dim, target_dim=40).to(device)
+    layer2_model = LC(l2_dim, target_dim=40).to(device)
+    layer3_model = LC(l3_dim, target_dim=40).to(device)
+    layer4_model = LC(l4_dim, target_dim=40).to(device)
+    layer5_model = LC(l5_dim, target_dim=40).to(device)
 
     opt1 = torch.optim.SGD(layer1_model.parameters(), lr=1e-4, momentum=0.9, nesterov=True)
     opt2 = torch.optim.SGD(layer2_model.parameters(), lr=1e-4, momentum=0.9, nesterov=True)
@@ -359,9 +359,9 @@ def awa_eval(name, model, train, val, test, device='cuda:0'):
 
     test_acc = [l1acc, l2acc, l3acc, l4acc, l5acc]
 
-    np.save(loc+name+'_unseen_epoch_losses', epoch_train_loss)
-    np.save(loc+name+'_unseen_epoch_val_acc', epoch_val_acc)
-    np.save(loc+name+'_unseen_test_acc', test_acc)
+    np.save(loc+name+'_epoch_losses', epoch_train_loss)
+    np.save(loc+name+'_epoch_val_acc', epoch_val_acc)
+    np.save(loc+name+'_test_acc', test_acc)
     print(name + ' Completed')
 
 
