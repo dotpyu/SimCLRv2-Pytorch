@@ -49,7 +49,7 @@ class LC(torch.nn.Module):
             return self.linear(input_dimension)
 
 
-def construct_val(ilsvrc_path):
+def construct_val(ilsvrc_path, return_sz=False):
     # valdir = os.path.join(ilsvrc_path, 'val')
     # normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
     #                                  std=[0.229, 0.224, 0.225])
@@ -81,6 +81,9 @@ def construct_val(ilsvrc_path):
     val_loader = torch.utils.data.DataLoader(
         unnoamlized_data,
         batch_size=2, shuffle=False, pin_memory=True, drop_last=False)
+
+    if return_sz:
+        return val_loader, len(unnoamlized_data)
 
     return val_loader
 
@@ -126,16 +129,39 @@ def awa_pipeline():
     val_tuples = zipped[train_split:val_split]
     test_tuples = zipped[val_split:]
 
-    train = DataLoader(train_tuples, shuffle=True, drop_last=False, batch_size=64)
+    train = DataLoader(train_tuples, shuffle=True, drop_last=False, batch_size=256)
     val = DataLoader(val_tuples, shuffle=True, drop_last=False, batch_size=64)
     test = DataLoader(test_tuples, shuffle=True, drop_last=False, batch_size=64)
 
     model = construct_simclr()
 
 
-    awa_eval('simclr', model, train, val, test)
+    #awa_eval('simclr', model, train, val, test)
 
 save_loc = '/users/pyu12/scratch/ssl_exp/'
+
+
+
+def extract_latent():
+    name='simclr'
+    device = 'cuda'
+    data_loader, data_sz = construct_val('/users/pyu12/data/pyu12/datasets/ILSVRC', return_sz=True)
+    # model, _ = get_resnet(*name_to_params(pth_path))
+    # model.load_state_dict(torch.load(pth_path)['resnet'])
+    model = construct_simclr()
+    model = model.to(device).eval()
+    latent_exp = np.zeros([data_sz, 2048])
+    offset = 0
+    for ndarray, label in data_loader:
+        bz = len(label)
+        imgs = torch.FloatTensor(ndarray).to(device)
+        layers = model(imgs, output_layer=True)
+        latent_exp[offset:offset+bz,:] = layers[4].detach().cpu().numpy()
+
+    np.save(save_loc+name+'_final_latent_rep_2048', latent_exp)
+    print('Completed')
+
+
 
 def awa_eval(name, model, train, val, test, device='cuda:0'):
     # Load AwA Binary Data (~32-64GB)
@@ -437,6 +463,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='SimCLR verifier')
     parser.add_argument('pth_path', type=str, help='path of the input checkpoint file')
     args = parser.parse_args()
+    extract_latent()
     #run(args.pth_path, ig=False)
     #run(args.pth_path)
-    awa_pipeline()
+    #awa_pipeline()
