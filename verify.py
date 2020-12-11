@@ -80,7 +80,7 @@ def construct_val(ilsvrc_path, return_sz=False):
 
     val_loader = torch.utils.data.DataLoader(
         unnoamlized_data,
-        batch_size=64, shuffle=False, pin_memory=True, drop_last=False)
+        batch_size=2, shuffle=False, drop_last=False)
 
     if return_sz:
         return val_loader, len(unnoamlized_data)
@@ -409,7 +409,7 @@ def run(pth_path, ig=True):
 
     top_10_preds = np.zeros((data_sz, 10))
     if ig:
-        ig_save = np.zeros((data_sz+2, 3, 224, 224))
+        ig_save = np.zeros((data_sz, 3, 224, 224))
     offset = 0
     for images, labels in tqdm(data_loader):
         bz = len(labels)
@@ -451,7 +451,7 @@ def run(pth_path, ig=True):
     # np.save(save_loc + name + '_prediceted_10k', predicted)
     # np.save(save_loc + name + '_top10pred_10k', top_10_preds)
     if ig:
-        np.save(save_loc+name+'_integrated_gradients_10k', ig_save)
+        np.save(save_loc+name+'_integrated_gradients_10k_redo', ig_save)
 
 
     total_correct = np.mean(p==t)
