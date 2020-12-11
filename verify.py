@@ -420,10 +420,11 @@ def run(pth_path, ig=True):
         target.append(labels)
         _, top10 = res.topk(10, dim=1)
         top_10_preds[offset:offset + bz, :] = top10.detach().cpu().numpy()
-        offset += bz
         if ig:
             ig_attributions = IG.attribute(imgs, target=pred.squeeze(1), n_steps=100)
             ig_save[offset:offset + bz, :, :, :] = ig_attributions.detach().cpu().numpy()
+
+        offset += bz
 
     p = torch.cat(preds).numpy()
     t = torch.cat(target).numpy()
@@ -459,11 +460,19 @@ def run(pth_path, ig=True):
     print(accuracy_score(p, t))
 
 
+
+def process():
+    name='simclr'
+    original=np.load(save_loc + name + '_integrated_gradients_10k')
+    new = original[2:]
+    np.save(save_loc + name + '_integrated_gradients_10k', new)
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='SimCLR verifier')
     parser.add_argument('pth_path', type=str, help='path of the input checkpoint file')
     args = parser.parse_args()
     extract_latent()
     #run(args.pth_path, ig=False)
-    run(args.pth_path)
+    process()
     #awa_pipeline()
