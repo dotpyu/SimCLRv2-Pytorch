@@ -465,5 +465,5 @@ if __name__ == '__main__':
     args = parser.parse_args()
     extract_latent()
     #run(args.pth_path, ig=False)
-    #run(args.pth_path)
+    run(args.pth_path)
     #awa_pipeline()
