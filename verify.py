@@ -463,7 +463,7 @@ def run(pth_path, ig=True):
 
 def process():
     name='simclr'
-    original=np.load(save_loc + name + '_integrated_gradients_10k')
+    original=np.load(save_loc + name + '_integrated_gradients_10k.npy')
     new = original[2:]
     np.save(save_loc + name + '_integrated_gradients_10k', new)
 
