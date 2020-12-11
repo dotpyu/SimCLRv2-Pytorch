@@ -472,7 +472,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='SimCLR verifier')
     parser.add_argument('pth_path', type=str, help='path of the input checkpoint file')
     args = parser.parse_args()
-    extract_latent()
+    #extract_latent()
     #run(args.pth_path, ig=False)
     process()
     #awa_pipeline()
